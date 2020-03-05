@@ -100,6 +100,10 @@ class GameMap {
     console.log(this.currMapState);
     console.log("\n");
   }
+
+  run() {
+    setInterval(this.itterate.bind(this), 1 * 1000);
+  }
 }
 
 function generateRandomMap(m, n) {
@@ -140,3 +144,6 @@ function readMapFromFile(filePath) {
   });
   return result;
 }
+
+let map = new GameMap(readMapFromFile("example.txt"));
+map.run();
