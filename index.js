@@ -117,15 +117,26 @@ function generateRandomMap(m, n) {
   return res;
 }
 
-let initState = [
-  [true, false, true, false, false],
-  [true, false, true, false, false],
-  [true, false, true, false, false],
-  [true, false, true, false, false],
-  [true, false, true, false, false]
-];
-
-let map = new GameMap(initState);
-map.itterate();
-map.itterate(2);
-map.itterate();
+/**
+ *
+ * @param {string} filePath
+ * @returns {boolean[][]}
+ */
+function readMapFromFile(filePath) {
+  let result = new Array();
+  let lines = fs.readFileSync(filePath, "utf8").split("\n");
+  lines.forEach((line, lineNum) => {
+    let colNum = 0;
+    result[lineNum] = new Array();
+    line.split(" ").forEach(char => {
+      if (char === "0") {
+        result[lineNum][colNum] = false;
+        colNum++;
+      } else if (char === "1") {
+        result[lineNum][colNum] = true;
+        colNum++;
+      }
+    });
+  });
+  return result;
+}
