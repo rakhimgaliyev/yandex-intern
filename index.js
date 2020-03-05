@@ -16,12 +16,18 @@ class GameMap {
    * @param {boolean[][]} initMapState
    */
   constructor(initMapState) {
+    if (typeof initMapState !== "object") {
+      return;
+    }
+
     this.currMapState = new Array();
     this.buffMapState = new Array();
 
     initMapState.forEach((element, index) => {
-      this.currMapState[index] = element.concat();
-      this.buffMapState[index] = element.concat();
+      if (typeof element === "object") {
+        this.currMapState[index] = element.concat();
+        this.buffMapState[index] = element.concat();
+      }
     });
 
     console.log(this.currMapState);
@@ -102,11 +108,25 @@ class GameMap {
   }
 
   run() {
+    if (
+      typeof this.currMapState !== "object" ||
+      this.currMapState.length === 0
+    ) {
+      return;
+    }
     setInterval(this.itterate.bind(this), 1 * 1000);
   }
 }
 
+/**
+ * @param {number} m lines num, if not valid/undefinde, default=3
+ * @param {number} n cols num, if not valid/undefinde, default=3
+ * @returns {boolean[][]}
+ */
 function generateRandomMap(m, n) {
+  if (typeof m !== "number" || m <= 0) m = 3;
+  if (typeof n !== "number" || n <= 0) n = 3;
+
   res = new Array();
   for (let i = 0; i < m; i++) {
     res[i] = new Array();
@@ -128,7 +148,17 @@ function generateRandomMap(m, n) {
  */
 function readMapFromFile(filePath) {
   let result = new Array();
-  let lines = fs.readFileSync(filePath, "utf8").split("\n");
+  let strFromFile = null;
+
+  try {
+    strFromFile = fs.readFileSync(filePath, "utf8");
+  } catch (error) {
+    console.error("Can't read file: ", error);
+    return;
+  }
+
+  let lines = strFromFile.split("\n");
+
   lines.forEach((line, lineNum) => {
     let colNum = 0;
     result[lineNum] = new Array();
@@ -142,8 +172,28 @@ function readMapFromFile(filePath) {
       }
     });
   });
+
   return result;
 }
 
-let map = new GameMap(readMapFromFile("example.txt"));
-map.run();
+/**
+ * @returns {string} path to map file or null, if it is wrong or empty
+ */
+function getPathFromSysArgv() {
+  let result = null;
+  process.argv.forEach(element => {
+    if (element.slice(0, 5) === "path=") {
+      result = element.slice(5);
+    }
+  });
+  return result;
+}
+
+let path = getPathFromSysArgv();
+if (path === null) {
+  let map = new GameMap(generateRandomMap());
+  map.run();
+} else {
+  let map = new GameMap(readMapFromFile(path));
+  map.run();
+}
